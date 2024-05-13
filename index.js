@@ -367,7 +367,7 @@ function save_attachments(container)
 			//
 			//	3.	Get the file name which also contain the file extension.
 			//
-			file_name = file.filename
+			let file_name = file.filename
 
 			//
 			//	4.	An email attachment is not required to have a name, this
@@ -439,7 +439,7 @@ function save_attachments(container)
 			//
 			//	8.	Then save the buffer of the attachment.
 			//
-			file_body = file.content
+			let file_body = file.content
 
 			//
 			//	9.	Split the S3 Key (path) so we can remove the last element.

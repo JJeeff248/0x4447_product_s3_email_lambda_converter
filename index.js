@@ -1,6 +1,7 @@
 let AWS = require('aws-sdk');
 let mime = require('mime');
 let parser = require("mailparser").simpleParser;
+let dompurify = require("dompurify");
 
 //
 //	Initialize S3.
@@ -196,7 +197,7 @@ function parse_the_email(container)
 			//
 			//	2.	Save the parsed email for the next promise.
 			//
-			container.parsed.html = parsed.html;
+			container.parsed.html = dompurify.sanitize(parsed.html);
 			container.parsed.text = parsed.text;
 			container.parsed.attachments = parsed.attachments;
 

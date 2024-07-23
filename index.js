@@ -1,7 +1,7 @@
 let AWS = require("aws-sdk");
 let mime = require("mime");
 let parser = require("mailparser").simpleParser;
-let DOMPurify = require("dompurify");
+let DOMPurify = require("isomorphic-dompurify");
 
 //
 //	Initialize S3.

@@ -19,7 +19,7 @@
   "homepage": "https://github.com/0x4447/0x4447-Project-Email-Lambda-Inbound#readme",
   "dependencies": {
     "aws-sdk": "^2.388.0",
-    "dompurify": "^3.1.6",
+    "isomorphic-dompurify": "^2.13.0",
     "mailparser": "^3.7.1",
     "mime": "^2.4.0"
   }

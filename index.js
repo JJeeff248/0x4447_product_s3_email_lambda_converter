@@ -25,7 +25,9 @@ exports.handler = (event) => {
     //		the string in a special way. They escape the string in a HTML style
     //		but for whatever reason they convert spaces in to +ses.
     //
-    let s3_key = event.Records[0].s3.object.key;
+    let sns = JSON.parse(event.Records[0].Sns.Message);
+
+    let s3_key = sns.Records[0].s3.object.key;
 
     //
     //	2.	So first we convert the + in to spaces.
@@ -42,7 +44,7 @@ exports.handler = (event) => {
     //	4.	This JS object will contain all the data within the chain.
     //
     let container = {
-        bucket: event.Records[0].s3.bucket.name,
+        bucket: sns.Records[0].s3.bucket.name,
         key: unescaped_key,
         parsed: {
             subject: "",
@@ -195,45 +197,6 @@ function parse_the_email(container) {
             container.parsed.html = DOMPurify.sanitize(parsed.html);
             container.parsed.text = parsed.text;
             container.parsed.attachments = parsed.attachments;
-
-            const dateTime = new Date(parsed.date);
-            const convertedDateTime = convertToUtcPlus12(dateTime);
-            const formattedDateTime = convertedDateTime.toFormat(
-                "YYYY-MM-DD HH:mm:ss"
-            );
-
-            const from_ = parsed.from;
-            const to = parsed.to;
-            let customTo;
-            try {
-                customTo = to
-                    .filter((email) => email.endsWith("@chris-sa.com"))[0]
-                    .split("@")[0];
-            } catch (error) {
-                customTo = "unknown";
-            }
-
-            // add record to dynamodb
-            dynamodb.putItem({
-                TableName: process.env.TABLE_NAME,
-                Item: {
-                    email_key: container.key,
-                    date_time: formattedDateTime.toString(),
-                    subject: parsed.subject,
-                    from: from_,
-                    to: to,
-                    custom_to: customTo,
-                },
-            });
-
-            console.log("Email record added to DynamoDB:", {
-                email_key: container.key,
-                date_time: formattedDateTime.toString(),
-                subject: parsed.subject,
-                from: from_,
-                to: to,
-                custom_to: customTo,
-            });
 
             //
             //	->	Move to the next chain.

@@ -281,6 +281,8 @@ function save_html(container) {
 function send_push_notification(container) {
     return new Promise(function (resolve, reject) {
         console.info("send_push_notification");
+        console.log("Subject: ", container.parsed.subject);
+        console.log("Text: ", container.parsed.text);
 
         const url = "https://api.onesignal.com/notifications?c=push";
         const options = {

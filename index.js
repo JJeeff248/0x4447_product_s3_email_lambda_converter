@@ -66,6 +66,9 @@ exports.handler = (event) => {
             return save_attachments(container);
         })
         .then(function (container) {
+            return send_push_notification(container);
+        })
+        .then(function (container) {
             return true;
         })
         .catch(function (error) {
@@ -272,6 +275,31 @@ function save_html(container) {
             //
             return resolve(container);
         });
+    });
+}
+
+function send_push_notification(container) {
+    return new Promise(function (resolve, reject) {
+        fetch("https://api.onesignal.com/notifications?c=push", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Basic " + process.env.ONESIGNAL_API_KEY,
+            },
+            body: JSON.stringify({
+                app_id: process.env.ONESIGNAL_APP_ID,
+                headings: {
+                    en: container.parsed.subject,
+                },
+                contents: {
+                    en: container.parsed.text,
+                },
+                target_channel: "push",
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => resolve(container))
+            .catch((error) => reject(error));
     });
 }
 

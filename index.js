@@ -40,6 +40,7 @@ exports.handler = (event) => {
         bucket: event.Records[0].s3.bucket.name,
         key: unescaped_key,
         parsed: {
+            subject: "",
             html: "",
             text: "",
             attachments: [],
@@ -177,6 +178,7 @@ function parse_the_email(container) {
             //
             //	2.	Save the parsed email for the next promise.
             //
+            container.parsed.subject = parsed.subject;
             container.parsed.html = DOMPurify.sanitize(parsed.html);
             container.parsed.text = parsed.text;
             container.parsed.attachments = parsed.attachments;

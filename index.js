@@ -280,6 +280,7 @@ function save_html(container) {
 
 function send_push_notification(container) {
     return new Promise(function (resolve, reject) {
+        console.info("send_push_notification");
         fetch("https://api.onesignal.com/notifications?c=push", {
             method: "POST",
             headers: {
@@ -297,7 +298,10 @@ function send_push_notification(container) {
                 target_channel: "push",
             }),
         })
-            .then((response) => response.json())
+            .then((response) => {
+                console.log(response.json());
+                return response.json();
+            })
             .then((data) => resolve(container))
             .catch((error) => reject(error));
     });

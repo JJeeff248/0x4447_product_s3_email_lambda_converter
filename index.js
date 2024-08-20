@@ -72,7 +72,7 @@ exports.handler = (event) => {
             return true;
         })
         .catch(function (error) {
-            console.error(error);
+            console.error("This is the error: ", error);
 
             return false;
         });
@@ -281,29 +281,33 @@ function save_html(container) {
 function send_push_notification(container) {
     return new Promise(function (resolve, reject) {
         console.info("send_push_notification");
-        fetch("https://api.onesignal.com/notifications?c=push", {
+
+        const url = "https://api.onesignal.com/notifications?c=push";
+        const options = {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                accept: "application/json",
                 Authorization: "Basic " + process.env.ONESIGNAL_API_KEY,
+                "content-type": "application/json",
             },
             body: JSON.stringify({
+                included_segments: ["All"],
+                contents: { en: container.parsed.text },
+                headings: { en: container.parsed.subject },
                 app_id: process.env.ONESIGNAL_APP_ID,
-                headings: {
-                    en: container.parsed.subject,
-                },
-                contents: {
-                    en: container.parsed.text,
-                },
-                target_channel: "push",
             }),
-        })
-            .then((response) => {
-                console.log(response.json());
-                return response.json();
+        };
+
+        fetch(url, options)
+            .then((res) => res.json())
+            .then((json) => {
+                console.log("Response: ", json);
+                return resolve(container);
             })
-            .then((data) => resolve(container))
-            .catch((error) => reject(error));
+            .catch((error) => {
+                console.log("Error: ", error);
+                return reject(container);
+            });
     });
 }
 

@@ -20,6 +20,7 @@
   "dependencies": {
     "aws-sdk": "^2.388.0",
     "isomorphic-dompurify": "^2.13.0",
+    "luxon": "^3.5.0",
     "mailparser": "^3.7.1",
     "mime": "^2.4.0"
   }

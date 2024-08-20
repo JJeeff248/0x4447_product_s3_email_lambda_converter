@@ -2,12 +2,17 @@ let AWS = require("aws-sdk");
 let mime = require("mime");
 let parser = require("mailparser").simpleParser;
 let DOMPurify = require("isomorphic-dompurify");
+const { DateTime } = require("luxon");
 
 //
 //	Initialize S3.
 //
 let s3 = new AWS.S3({
     apiVersion: "2006-03-01",
+});
+
+let dynamodb = new AWS.DynamoDB({
+    apiVersion: "2012-08-10",
 });
 
 //
@@ -158,6 +163,14 @@ function remove_extension(container) {
     });
 }
 
+function convertToUtcPlus12(dt) {
+    // Parse the input as a Luxon DateTime object
+    let dtLuxon = DateTime.fromISO(dt, { zone: "UTC" });
+
+    // Convert to UTC+12 (Pacific/Auckland as an example)
+    return dtLuxon.setZone("Pacific/Auckland");
+}
+
 //
 //	Convert the raw email in to HTML and Text, and extract also the
 //	attachments.
@@ -182,6 +195,45 @@ function parse_the_email(container) {
             container.parsed.html = DOMPurify.sanitize(parsed.html);
             container.parsed.text = parsed.text;
             container.parsed.attachments = parsed.attachments;
+
+            const dateTime = new Date(parsed.date);
+            const convertedDateTime = convertToUtcPlus12(dateTime);
+            const formattedDateTime = convertedDateTime.toFormat(
+                "YYYY-MM-DD HH:mm:ss"
+            );
+
+            const from_ = parsed.from;
+            const to = parsed.to;
+            let customTo;
+            try {
+                customTo = to
+                    .filter((email) => email.endsWith("@chris-sa.com"))[0]
+                    .split("@")[0];
+            } catch (error) {
+                customTo = "unknown";
+            }
+
+            // add record to dynamodb
+            dynamodb.putItem({
+                TableName: process.env.TABLE_NAME,
+                Item: {
+                    email_key: container.key,
+                    date_time: formattedDateTime.toString(),
+                    subject: parsed.subject,
+                    from: from_,
+                    to: to,
+                    custom_to: customTo,
+                },
+            });
+
+            console.log("Email record added to DynamoDB:", {
+                email_key: container.key,
+                date_time: formattedDateTime.toString(),
+                subject: parsed.subject,
+                from: from_,
+                to: to,
+                custom_to: customTo,
+            });
 
             //
             //	->	Move to the next chain.

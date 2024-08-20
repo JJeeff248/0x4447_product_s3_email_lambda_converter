@@ -283,8 +283,6 @@ function save_html(container) {
 function send_push_notification(container) {
     return new Promise(function (resolve, reject) {
         console.info("send_push_notification");
-        console.log("Subject: ", container.parsed.subject);
-        console.log("Text: ", container.parsed.text);
 
         const url = "https://api.onesignal.com/notifications?c=push";
         const options = {
@@ -304,14 +302,8 @@ function send_push_notification(container) {
 
         fetch(url, options)
             .then((res) => res.json())
-            .then((json) => {
-                console.log("Response: ", json);
-                return resolve(container);
-            })
-            .catch((error) => {
-                console.log("Error: ", error);
-                return reject(container);
-            });
+            .then((json) => resolve(json))
+            .catch((error) => reject(error));
     });
 }
 
